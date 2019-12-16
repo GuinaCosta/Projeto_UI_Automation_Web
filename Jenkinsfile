@@ -1,13 +1,15 @@
 pipeline{
-  agent {
-    docker { image 'node:8.16.2-alpine3.10' }
-  }
-  stages{
+
+  agent any
+
+  stages {
+
     stage ('checkout source'){
       steps{
         checkout scm
       }
     }
+
     stage ('install modules'){
       steps{
         sh '''
@@ -15,11 +17,13 @@ pipeline{
         '''
       }
     }
+
     stage ('code quality'){
       steps{
         sh '$(npm bin)/ng lint'
       }
     }
+
     stage ('build') {
       steps{
         sh '$(npm bin)/ng build --configuration=production'
@@ -38,7 +42,7 @@ pipeline{
     //   }
     // }
 
-    stage ('test ui'){
+    stage ('automated test ui') {
       steps{
         build 'Poc-Automation_Web/master'
       }
