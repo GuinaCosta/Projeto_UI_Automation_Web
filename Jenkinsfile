@@ -1,7 +1,9 @@
 pipeline{
-  agent { label 'nodejs8' }
+  agent {
+    docker { image 'node:8.16.2-alpine3.10' }
+  }
   stages{
-    stage ('checkout'){
+    stage ('checkout source'){
       steps{
         checkout scm
       }
@@ -9,21 +11,8 @@ pipeline{
     stage ('install modules'){
       steps{
         sh '''
-          npm install --verbose -d 
-          npm install --save classlist.js
+          npm install --verbose -d
         '''
-      }
-    }
-    stage ('test'){
-      steps{
-        sh '''
-          $(npm bin)/ng test --single-run --browsers Chrome_no_sandbox
-        '''
-      }
-      post {
-          always {
-            junit "test-results.xml"
-          }
       }
     }
     stage ('code quality'){
@@ -36,12 +25,22 @@ pipeline{
         sh '$(npm bin)/ng build --configuration=production'
       }
     }
-    stage ('build image') {
+    // stage ('test'){
+    //   steps{
+    //     sh '''
+    //       $(npm bin)/ng test --watch=false
+    //     '''
+    //   }
+    //   post {
+    //       always {
+    //         junit "test-results.xml"
+    //       }
+    //   }
+    // }
+
+    stage ('test ui'){
       steps{
-        sh '''
-          rm -rf node_modules
-          oc start-build angular-5-example --from-dir=. --follow
-        '''
+        build 'Poc-Automation_Web/master'
       }
     }
   }
